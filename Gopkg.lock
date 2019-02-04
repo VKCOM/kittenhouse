@@ -68,21 +68,6 @@
   pruneopts = "UT"
   revision = "e2cc962e10cc988c93d7411fdbce6a90e2d43609"
 
-[[projects]]
-  branch = "master"
-  digest = "1:77fdc62404a6c4c0ba1bdcabb4ed2aa8c18aa8f592ad0f65453cd1a09075e78e"
-  name = "github.com/vkcom/kittenhouse"
-  packages = [
-    "core/clickhouse",
-    "core/cmd",
-    "core/destination",
-    "core/inmem",
-    "core/kittenerror",
-    "core/persist",
-  ]
-  pruneopts = "UT"
-  revision = "8554fb4081758ebf33ed7a391a41ec49e89be48f"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -90,12 +75,6 @@
     "github.com/pierrec/lz4",
     "github.com/valyala/fasthttp",
     "github.com/vkcom/engine-go/srvfunc",
-    "github.com/vkcom/kittenhouse/core/clickhouse",
-    "github.com/vkcom/kittenhouse/core/cmd",
-    "github.com/vkcom/kittenhouse/core/destination",
-    "github.com/vkcom/kittenhouse/core/inmem",
-    "github.com/vkcom/kittenhouse/core/kittenerror",
-    "github.com/vkcom/kittenhouse/core/persist",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
