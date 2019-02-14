@@ -16,7 +16,7 @@ You will need to do the following to install kittenhouse on your server (the onl
 
 The simplest way to launch kittenhouse is the following:
 
-```
+```sh
 $ kittenhouse -u='' -g=''
 ```
 
@@ -24,7 +24,7 @@ It will launch kittenhouse with current user and group (empty `-u` and `-g` argu
 
 Here are the essential command-line options that you will most certainly need to modify are the following:
 
-```
+```sh
 -u <user>        change daemon user (default is "kitten")
 -g <group>       change daemon group (default is "kitten")
 -ch-addr <addr>  ClickHouse server address (if you have only one ClickHouse server)
@@ -44,7 +44,7 @@ KittenHouse is relatively simple to use: it only has two commands: select and in
 
 KittenHouse actually writes it's own logs into ClickHouse as well so you will need to create the following tables on your default ClickHouse cluster:
 
-```
+```sql
 CREATE TABLE default.internal_logs (
   date Date DEFAULT toDate(time),
   time DateTime,
@@ -94,7 +94,7 @@ Default format for INSERT queries is VALUES (SQL, text-based). You can pretty mu
 
 In order to do INSERT to some table, you send HTTP POST to kittenhouse port:
 
-```
+```sh
 HTTP POST /
 
 Query string params:
@@ -113,7 +113,7 @@ POST body:
 
 Example using curl:
 
-```
+```sh
 $ curl -d "('2018-11-14 10:00:00','yourserver',123)" -v 'http://localhost:13338/?table=internal_logs_buffer(time,server,port)'
 ```
 
@@ -133,7 +133,7 @@ Query string params:
 
 Example using curl (get current hostname from server):
 
-```
+```sh
 $ curl -v 'http://127.0.0.1:13338/?query=SELECT%20hostName()%20FROM%20system.one'
 ```
 
@@ -141,7 +141,7 @@ $ curl -v 'http://127.0.0.1:13338/?query=SELECT%20hostName()%20FROM%20system.one
 
 If you have more than 1 ClickHouse server (which you probably do) you will need to be able to route INSERTs and SELECTs to different tables into different clusters. Is is supported in kittenhouse using the following (a bit weird) syntax:
 
-```
+```ini
 # this is a comment
 
 # override default port with 8125 (default is 8123, ClickHouse HTTP interface)
@@ -168,7 +168,7 @@ Kittenhouse is shipped with it's own reverse proxy if you have a high number of 
 
 You run it the following way:
 
-```
+```sh
 $ kittenhouse -p 8124 -reverse -ch-addr=127.0.0.1:8123
 ```
 
