@@ -19,7 +19,9 @@ const (
 // https://github.com/yandex/ClickHouse/blob/5b113df16c6b9e6464cb55fb04280a8a5480794a/dbms/src/IO/CompressedReadBufferBase.cpp#L41
 func compress(buf []byte) []byte {
 	var res = make([]byte, lz4.CompressBlockBound(len(buf))+compressedBlockHeaderSize+checksumSize)
-	compressedLen, _ := lz4.CompressBlock(buf, res[checksumSize+compressedBlockHeaderSize:], 0)
+	var hashTable [1 << 16]int
+
+	compressedLen, _ := lz4.CompressBlock(buf, res[checksumSize+compressedBlockHeaderSize:], hashTable[:])
 
 	res[checksumSize] = compressionMethodLz4
 	binary.LittleEndian.PutUint32(res[checksumSize+1:], compressedBlockHeaderSize+uint32(compressedLen))
