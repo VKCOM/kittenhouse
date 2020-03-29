@@ -116,7 +116,7 @@ func IsSyntaxError(err error) bool {
 }
 
 // Flush sends data to clickhouse and returns errors if any
-func Flush(dst *destination.Setting, table string, body []byte, rowBinary bool) error {
+func Flush(dst *destination.Setting, table string, body io.Reader, rowBinary bool) error {
 	if strings.Contains(table, "@") {
 		// table name contains shard, we need to cut it:
 		// table_name@shard(col1, ..., colN) -> table_name(col1, ..., colN)
@@ -427,37 +427,11 @@ func (m *kittenMeow) initConn(srv destination.ServerHostPort) (err error) {
 	return nil
 }
 
-func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, compression bool) error {
+func flush(dst *destination.Setting, table string, body io.Reader, rowBinary bool, compression bool) error {
 	srv, ok := dst.ChooseNextServer()
 	if !ok {
 		return ErrTemporarilyUnavailable
 	}
-
-	// do not estabilish more than a single HTTP connection to clickhouse server
-	meow := getKittenMeowForServer(srv)
-
-	meow.Lock()
-	defer meow.Unlock()
-
-	supported, err := meow.tryFlush(srv, table, body, rowBinary, compression)
-	if supported {
-		if err != nil {
-			log.Printf("Could not KITTEN/MEOW to table %s to clickhouse: %s", table, err.Error())
-
-			// see comment below about why we only check for network errors, not HTTP status codes
-			if _, ok := err.(*httpError); !ok {
-				dst.TempDisableHost(srv, checkHostAlive)
-			}
-		}
-		return err
-	}
-
-	// compression is not too stable
-	if compression {
-		body = compress(body)
-	}
-
-	start := time.Now()
 
 	queryPrefix := insertQueryPrefixEscaped(table, rowBinary)
 
@@ -468,7 +442,7 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 
 	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s", srv, compressionArgs, queryPrefix)
 
-	resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
+	resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", body)
 	if err != nil {
 		log.Printf("Could not post to table %s to clickhouse: %s", table, err.Error())
 		dst.TempDisableHost(srv, checkHostAlive)
@@ -498,10 +472,6 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 	}
 
 	io.Copy(ioutil.Discard, resp.Body) // keepalive
-
-	if debug {
-		log.Printf("Sent %d KiB to clickhouse server %s for %s", len(body)/1024, srv, time.Since(start))
-	}
 
 	return nil
 }

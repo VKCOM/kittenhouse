@@ -64,7 +64,7 @@ func (f *flusher) loopIteration() {
 }
 
 func (f *flusher) flush(table string, buf *writeBuf, rowBinary bool) {
-	flushLen := buf.b.Len()
+	flushLen := buf.len
 	if flushLen == 0 {
 		return
 	}
@@ -76,7 +76,7 @@ func (f *flusher) flush(table string, buf *writeBuf, rowBinary bool) {
 	atomic.AddInt64(&totalTraffic, int64(flushLen))
 
 	// do not care about errors for non-persistent events, so we don't retry
-	if err := clickhouse.Flush(f.dst, table, buf.b.Bytes(), rowBinary); err != nil {
+	if err := clickhouse.Flush(f.dst, table, buf, rowBinary); err != nil {
 		persist.InternalLog("inmem.flush_error", table, int64(flushLen), err.Error(), "")
 		atomic.AddInt64(&flushErrorCount, 1)
 		f.errCnt++

@@ -361,7 +361,7 @@ func (s *sender) sendFile(relFilename string, off ackOff) (newOff ackOff, fullyD
 		log.Printf("Flushing %s (%d bytes)", off.Table, len(s.buf))
 	}
 
-	if err := clickhouse.Flush(s.dst, off.Table, s.buf, off.RowBinary); err != nil {
+	if err := clickhouse.Flush(s.dst, off.Table, bytes.NewReader(s.buf), off.RowBinary); err != nil {
 		shouldRetry := s.handleSyntaxErrors(relFilename, off.Table, bytesRead, err)
 		if shouldRetry {
 			return off, false, err

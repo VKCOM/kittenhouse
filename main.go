@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"time"
@@ -82,7 +83,7 @@ func handlePOST(ctx *fasthttp.RequestCtx) {
 		err := clickhouse.Flush(
 			clickhouse.GetDestinationSetting(strings.TrimSpace(tableClean)),
 			tableWithColumns,
-			[]byte(data),
+			bytes.NewReader(data),
 			rowbinary,
 		)
 		if err != nil {
