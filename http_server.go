@@ -12,8 +12,6 @@ import (
 	"github.com/vkcom/kittenhouse/persist"
 )
 
-// Большая часть кода взята из github.com/VKCOM/kittenhouse.
-
 func serveHTTP() {
 	h := makeHTTPServer()
 	srv := &fasthttp.Server{

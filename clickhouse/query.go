@@ -25,8 +25,8 @@ const (
 )
 
 type (
-	// QueryParams это параметры https://github.com/yandex/ClickHouse/blob/master/docs/ru/operations/settings/query_complexity.md
-	// А также параметры из https://clickhouse.yandex/docs/ru/interfaces/http/
+	// QueryParams for https://github.com/yandex/ClickHouse/blob/master/docs/ru/operations/settings/query_complexity.md
+	// Check documentation https://clickhouse.yandex/docs/ru/interfaces/http/
 	QueryParams struct {
 		MaxExecutionSpeed      int32
 		MaxExecutionSpeedBytes int32
@@ -176,7 +176,7 @@ func GetDestinationHostBySessionId(tableName string, params *QueryParams) (srv d
 		tableDstSessionIdsMap.Unlock()
 	}
 
-	// Основная работа
+	// Main section
 
 	sessionId := params.SessionId
 

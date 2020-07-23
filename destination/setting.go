@@ -10,10 +10,10 @@ import (
 var TestSeed int64 = 0
 
 type (
-	// ServersStr represent location that accepts logs (e.g. "adm812715:8123" or "=db808110*100 =db607715*100 =db813112*100")
+	// ServersStr represent location that accepts logs (e.g. "srv1:8123" or "=srv1*100 =srv2*100 =srv3*100")
 	ServersStr string
 
-	// ServerHostPort is a full host name with port, e.g. "adm812715:8123"
+	// ServerHostPort is a full host name with port, e.g. "srv1:8123"
 	ServerHostPort string
 
 	// Server is a single entry in cluster specification
@@ -118,7 +118,7 @@ func (s *Setting) tryRestoreHostLoop(srv ServerHostPort, aliveCheck aliveCheckFu
 	const checkingIntervalMax = 120 * time.Second
 
 	for {
-		// Плавное повышение пауз между проверками живости сервера
+		// smoothly increase time of pause between health check
 		checkingIntervalDispersion := time.Duration(float64(checkingInterval) * (1 + rand.Float64()))
 		if checkingInterval = 2 * checkingIntervalDispersion; checkingInterval > checkingIntervalMax {
 			checkingInterval = checkingIntervalMax

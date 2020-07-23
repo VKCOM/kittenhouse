@@ -23,11 +23,11 @@ import (
 )
 
 var (
-	// Build* заполняются при сборке go build -ldflags
+	//Build* filled in assembly go build -ldflags
 	BuildTime    string
 	BuildOSUname string
 	BuildCommit  string
-	buildVersion string // объединение Build* в одну строку
+	buildVersion string // join Build* into single string
 )
 
 var (
@@ -36,7 +36,6 @@ var (
 
 		disableKittenMeow bool
 
-		protocol   string
 		host       string
 		port       uint
 		help       bool
@@ -88,7 +87,6 @@ func init() {
 	flag.BoolVar(&argv.reverse, `reverse`, false, `start reverse proxy server instead (ch-addr is used as clickhouse host-port)`)
 
 	// common options
-	flag.StringVar(&argv.protocol, `protocol`, `rpc`, `protocol to use; rpc or http`)
 	flag.StringVar(&argv.host, `host`, `0.0.0.0`, `listening host`)
 	flag.UintVar(&argv.port, `port`, 13338, `listening port. REQUIRED`)
 	flag.UintVar(&argv.port, `p`, 13338, `listening port. REQUIRED`)
@@ -312,14 +310,8 @@ func main() {
 	go updateThread(updCh)
 	go heartbeatThread()
 
-	switch argv.protocol {
-	case "http":
-		serveHTTP()
-	default:
-		log.Fatalf("Unsupported protocol: %q", argv.protocol)
-	}
-
-	log.Printf("Listening %s:%d (TCP/%s)", argv.host, argv.port, argv.protocol)
+	serveHTTP()
+	log.Printf("Listening %s:%d", argv.host, argv.port)
 
 	go listenUDP()
 

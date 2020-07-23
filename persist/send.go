@@ -386,7 +386,7 @@ func (s *sender) sendFile(relFilename string, off ackOff) (newOff ackOff, fullyD
 	return off, fullyDelivered, nil
 }
 
-// попытаться "обезвредить" синтаксические (и другие) ошибки в батче, чтобы можно было послать все остальное
+// try to fix syntax errors (or other one) in batch
 func (s *sender) handleSyntaxErrors(relFilename, table string, bytesRead int64, err error) (shouldRetry bool) {
 	if !clickhouse.IsSyntaxError(err) {
 		return true
