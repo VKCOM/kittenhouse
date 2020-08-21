@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"os"
 	"io"
 	"io/ioutil"
 	"log"
@@ -30,7 +31,11 @@ const (
 )
 
 var (
+    // debug enable
 	debug = (os.Getenv("CLICKHOUSE_DEBUG") != "")
+
+    // database name for queries
+	databaseName = getEnv("CLICKHOUSE_DATABASE_NAME", "default");
 
 	// kittenMeow is a custom protocol over HTTP that allows to efficiently stream lots of data
 	kittenMeowConn = struct {
@@ -466,7 +471,7 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 		compressionArgs = "decompress=1&http_native_compression_disable_checksumming_on_decompress=1&"
 	}
 
-	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s", srv, compressionArgs, queryPrefix)
+	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, databaseName)
 
 	resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
 	if err != nil {
@@ -504,4 +509,12 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 	}
 
 	return nil
+}
+
+// Simple helper function to read an environment or return a default value
+func getEnv(key string, defaultVal string) string {
+    if value, exists := os.LookupEnv(key); exists {
+	return value
+    }
+    return defaultVal
 }
