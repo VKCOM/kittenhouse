@@ -37,6 +37,12 @@ var (
     // database name for queries
 	databaseName = getEnv("CLICKHOUSE_DATABASE_NAME", "default");
 
+	// database user
+	clickhouseUser = getEnv("CLICKHOUSE_USER", "");
+
+    // database password
+    clickhousePassword = getEnv("CLICKHOUSE_PASSWORD", "");
+
 	// kittenMeow is a custom protocol over HTTP that allows to efficiently stream lots of data
 	kittenMeowConn = struct {
 		sync.Mutex
@@ -473,7 +479,22 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 
 	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, databaseName)
 
-	resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
+	//resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
+	// generate request
+	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	if err != nil { panic(err) }
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// add clickhouse user
+	if clickhouseUser != "" {
+	    req.Header.Add("X-ClickHouse-User", clickhouseUser)
+	}
+	// add clickhouse password
+	if clickhousePassword != "" {
+	    req.Header.Add("X-ClickHouse-Key", clickhousePassword)
+	}
+	// send request
+	resp, err := httpClient.Do(req)
+    // check error
 	if err != nil {
 		log.Printf("Could not post to table %s to clickhouse: %s", table, err.Error())
 		dst.TempDisableHost(srv, checkHostAlive)
