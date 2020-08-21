@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"os"
 	"io"
 	"io/ioutil"
 	"log"
@@ -531,6 +530,8 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 
 	return nil
 }
+
+//
 
 // Simple helper function to read an environment or return a default value
 func getEnv(key string, defaultVal string) string {
