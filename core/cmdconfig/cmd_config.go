@@ -32,8 +32,6 @@ var (
 		MaxFileSize       int64
 		RotateIntervalSec int64
 	}
-
-	LogFd *os.File
 )
 
 func init() {

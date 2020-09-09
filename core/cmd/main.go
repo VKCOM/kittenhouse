@@ -31,6 +31,8 @@ var (
 	BuildOSUname string
 	BuildCommit  string
 	buildVersion string // concatination of Build* into a single string
+
+	logFd *os.File
 )
 
 const (
@@ -110,7 +112,7 @@ func reopenLog() {
 	}
 
 	var err error
-	logFd, err = srvfunc.LogRotate(cmdconfig.LogFd, cmdconfig.Argv.Log)
+	logFd, err = srvfunc.LogRotate(logFd, cmdconfig.Argv.Log)
 	if err != nil {
 		os.Stderr.WriteString(fmt.Sprintf(`Cannot log to file "%s": %s`, cmdconfig.Argv.Log, err.Error()))
 		return

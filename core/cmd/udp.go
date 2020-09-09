@@ -58,7 +58,7 @@ func parseUDPPacket(buf []byte) (table string, data []byte, flags byte, err erro
 func listenUDP() {
 	buf := make([]byte, maxUDPPacketSize)
 
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", cmdconfig.Argv.Host, cmdconfig.argv.Port))
+	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", cmdconfig.Argv.Host, cmdconfig.Argv.Port))
 	if err != nil {
 		log.Fatalf("Could not resolve udp addr: %s", err.Error())
 	}
