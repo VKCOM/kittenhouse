@@ -22,7 +22,7 @@ import (
 	"crypto/tls"
 
 	"github.com/vkcom/engine-go/srvfunc"
-	"github.com/vkcom/kittenhouse/core/cmdconfig"
+	cmd_config "github.com/vkcom/kittenhouse/core/cmdconfig"
 	"github.com/vkcom/kittenhouse/core/destination"
 )
 
