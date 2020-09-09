@@ -9,28 +9,28 @@ var (
 	Argv struct {
 		reverse bool
 
-		host       string
-		port       uint
+		Host       string
+		Port       uint
 		help       bool
 		version    bool
-		markAsDone bool
-		user       string
-		group      string
-		log        string
+		MarkAsDone bool
+		User       string
+		Group      string
+		Log        string
 
-		maxOpenFiles      uint64
-		nProc             uint
-		pprofHostPort     string
-		chHost            string
-		chDatabase        string
-		chUser            string
-		chPassword        string
-		chSslCertPath     string
-		config            string
-		dir               string
-		maxSendSize       int64
-		maxFileSize       int64
-		rotateIntervalSec int64
+		MaxOpenFiles      uint64
+		NProc             uint
+		PprofHostPort     string
+		ChHost            string
+		ChDatabase        string
+		ChUser            string
+		ChPassword        string
+		ChSslCertPath     string
+		Config            string
+		Dir               string
+		MaxSendSize       int64
+		MaxFileSize       int64
+		RotateIntervalSec int64
 	}
 
 	logFd *os.File
