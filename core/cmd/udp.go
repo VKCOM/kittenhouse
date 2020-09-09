@@ -10,6 +10,7 @@ import (
 	"net"
 	"syscall"
 
+	cmdconfig "github.com/vkcom/kittenhouse/core/cmdconfig"
 	"github.com/vkcom/kittenhouse/core/inmem"
 )
 
@@ -57,7 +58,7 @@ func parseUDPPacket(buf []byte) (table string, data []byte, flags byte, err erro
 func listenUDP() {
 	buf := make([]byte, maxUDPPacketSize)
 
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", argv.host, argv.port))
+	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", cmdconfig.Argv.Host, cmdconfig.Argv.Port))
 	if err != nil {
 		log.Fatalf("Could not resolve udp addr: %s", err.Error())
 	}
@@ -68,7 +69,7 @@ func listenUDP() {
 	}
 	defer conn.Close()
 
-	log.Printf("Listening %s:%d (UDP)", argv.host, argv.port)
+	log.Printf("Listening %s:%d (UDP)", cmdconfig.Argv.Host, cmdconfig.Argv.Port)
 
 	for {
 		n, _, err := conn.ReadFromUDP(buf)

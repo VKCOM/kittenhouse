@@ -18,7 +18,11 @@ import (
 	"sync"
 	"time"
 
+	"crypto/x509"
+	"crypto/tls"
+
 	"github.com/vkcom/engine-go/srvfunc"
+	cmdconfig "github.com/vkcom/kittenhouse/core/cmdconfig"
 	"github.com/vkcom/kittenhouse/core/destination"
 )
 
@@ -39,14 +43,8 @@ var (
 	}{
 		m: make(map[destination.ServerHostPort]*kittenMeow),
 	}
-
-	httpClient = &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost: 1,
-			DialContext:         srvfunc.CachingDialer,
-		},
-		Timeout: time.Minute,
-	}
+    // generate HTTP client
+	httpClient = generateHttpClient()
 )
 
 type kittenMeow struct {
@@ -466,9 +464,26 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 		compressionArgs = "decompress=1&http_native_compression_disable_checksumming_on_decompress=1&"
 	}
 
-	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s", srv, compressionArgs, queryPrefix)
+	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, cmdconfig.Argv.ChDatabase)
 
-	resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
+	//resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
+	// generate request
+	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+	    panic(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// add clickhouse user
+	if cmdconfig.Argv.ChUser != "" {
+	    req.Header.Add("X-ClickHouse-User", cmdconfig.Argv.ChUser)
+	}
+	// add clickhouse password
+	if cmdconfig.Argv.ChPassword != "" {
+	    req.Header.Add("X-ClickHouse-Key", cmdconfig.Argv.ChPassword)
+	}
+	// send request
+	resp, err := httpClient.Do(req)
+    // check error
 	if err != nil {
 		log.Printf("Could not post to table %s to clickhouse: %s", table, err.Error())
 		dst.TempDisableHost(srv, checkHostAlive)
@@ -504,4 +519,37 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 	}
 
 	return nil
+}
+
+// generate HTTP client
+func generateHttpClient() *http.Client {
+    // SSL cert path
+    var sslCertPath = cmdconfig.Argv.ChSslCertPath
+    //
+    if sslCertPath != "" {
+        // read cert
+        caCert, err := ioutil.ReadFile(sslCertPath)
+        // if cert absent, panic
+        if err != nil { panic(err) }
+        var caCertPool = x509.NewCertPool()
+        caCertPool.AppendCertsFromPEM(caCert)
+        return &http.Client{
+                    Transport: &http.Transport{
+               		MaxIdleConnsPerHost: 1,
+               		DialContext:         srvfunc.CachingDialer,
+               		TLSClientConfig: &tls.Config{
+               		    RootCAs: caCertPool,
+               		},
+                },
+            Timeout: time.Minute,
+        }
+    } else {
+        return &http.Client{
+                    Transport: &http.Transport{
+               		MaxIdleConnsPerHost: 1,
+               		DialContext:         srvfunc.CachingDialer,
+                },
+            Timeout: time.Minute,
+        }
+    }
 }

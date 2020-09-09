@@ -25,13 +25,17 @@ It will launch kittenhouse with current user and group (empty `-u` and `-g` argu
 Here are the essential command-line options that you will most certainly need to modify are the following:
 
 ```sh
--u <user>        change daemon user (default is "kitten")
--g <group>       change daemon group (default is "kitten")
--ch-addr <addr>  ClickHouse server address (if you have only one ClickHouse server)
--l <filename>    log file (default is STDERR)
--h <host>        listen host (default is "0.0.0.0" which may be dangerous!)
--p <port>        listen port (default is 13338)
--dir <dirname>   directory where kittenhouse stores persistent content
+-u <user>                change daemon user (default is "kitten")
+-g <group>               change daemon group (default is "kitten")
+-ch-addr <addr>          ClickHouse server address (if you have only one ClickHouse server)
+-l <filename>            log file (default is STDERR)
+-h <host>                listen host (default is "0.0.0.0" which may be dangerous!)
+-p <port>                listen port (default is 13338)
+-dir <dirname>           directory where kittenhouse stores persistent content
+-db <database name>      ClickHouse database (default is "default")
+-ch-user <username>      Clickhouse username
+-ch-password <password>  Clickhouse password
+-ch-ssl-cert-path <path> Clickhouse SSL certificate path
 ```
 
 You can see the full list of options by running `kittenhouse --help`.
