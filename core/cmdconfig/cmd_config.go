@@ -33,7 +33,7 @@ var (
 		RotateIntervalSec int64
 	}
 
-	logFd *os.File
+	LogFd *os.File
 )
 
 func init() {
