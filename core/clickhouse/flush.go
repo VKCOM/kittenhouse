@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 
 	"github.com/vkcom/engine-go/srvfunc"
+	"github.com/vkcom/kittenhouse/core/cmd"
 	"github.com/vkcom/kittenhouse/core/destination"
 )
 
@@ -37,13 +38,13 @@ var (
 	debug = (os.Getenv("CLICKHOUSE_DEBUG") != "")
 
     // database name for queries
-	databaseName = getEnv("CLICKHOUSE_DATABASE_NAME", "default");
+	//databaseName = getEnv("CLICKHOUSE_DATABASE_NAME", "default");
 
 	// database user
-	clickhouseUser = getEnv("CLICKHOUSE_USER", "");
+	//clickhouseUser = getEnv("CLICKHOUSE_USER", "");
 
     // database password
-    clickhousePassword = getEnv("CLICKHOUSE_PASSWORD", "");
+    //clickhousePassword = getEnv("CLICKHOUSE_PASSWORD", "");
 
 	// kittenMeow is a custom protocol over HTTP that allows to efficiently stream lots of data
 	kittenMeowConn = struct {
@@ -473,20 +474,22 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 		compressionArgs = "decompress=1&http_native_compression_disable_checksumming_on_decompress=1&"
 	}
 
-	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, databaseName)
+	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, cmd.argv.chDatabase)
 
 	//resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
 	// generate request
 	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
-	if err != nil { panic(err) }
+	if err != nil {
+	    panic(err)
+	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	// add clickhouse user
-	if clickhouseUser != "" {
-	    req.Header.Add("X-ClickHouse-User", clickhouseUser)
+	if cmd.argv.chUser != "" {
+	    req.Header.Add("X-ClickHouse-User", cmd.argv.chUser)
 	}
 	// add clickhouse password
-	if clickhousePassword != "" {
-	    req.Header.Add("X-ClickHouse-Key", clickhousePassword)
+	if cmd.argv.chPassword != "" {
+	    req.Header.Add("X-ClickHouse-Key", cmd.argv.chPassword)
 	}
 	// send request
 	resp, err := httpClient.Do(req)
@@ -531,7 +534,8 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 // generate HTTP client
 func generateHttpClient() *http.Client {
     // SSL cert path
-    var sslCertPath = getEnv("CLICKHOUSE_SSL_CERT_PATH", "")
+    //var sslCertPath = getEnv("CLICKHOUSE_SSL_CERT_PATH", "")
+    var sslCertPath = cmd.argv.chSslCertPath
     //
     if sslCertPath != "" {
         // read cert

@@ -49,6 +49,10 @@ var (
 		nProc             uint
 		pprofHostPort     string
 		chHost            string
+		chDatabase        string
+		chUser            string
+		chPassword        string
+		chSslCertPath     string
 		config            string
 		dir               string
 		maxSendSize       int64
@@ -94,6 +98,10 @@ func init() {
 	flag.UintVar(&argv.nProc, `cores`, uint(0), `max cpu cores usage`)
 	flag.StringVar(&argv.pprofHostPort, `pprof`, ``, `host:port for http pprof`)
 	flag.Uint64Var(&argv.maxOpenFiles, `max-open-files`, 262144, `open files limit`)
+	flag.StringVar(&argv.chDatabase, `db`, `default`, "clickhouse database")
+	flag.StringVar(&argv.chUser, `ch-user`, ``, "clickhouse user")
+	flag.StringVar(&argv.chPassword, `ch-password`, ``, "clickhouse password")
+	flag.StringVar(&argv.chSslCertPath, `ch-ssl-cert-path`, ``, "clickhouse SSL cert path")
 
 	// local proxy options
 	flag.StringVar(&argv.config, `c`, ``, `path to routing config`)
