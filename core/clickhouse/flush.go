@@ -474,7 +474,7 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 		compressionArgs = "decompress=1&http_native_compression_disable_checksumming_on_decompress=1&"
 	}
 
-	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, cmd.argv.chDatabase)
+	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s&database=%s", srv, compressionArgs, queryPrefix, cmd_config.argv.chDatabase)
 
 	//resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", bytes.NewReader(body))
 	// generate request
@@ -484,12 +484,12 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	// add clickhouse user
-	if cmd.argv.chUser != "" {
-	    req.Header.Add("X-ClickHouse-User", cmd.argv.chUser)
+	if cmd_config.argv.chUser != "" {
+	    req.Header.Add("X-ClickHouse-User", cmd_config.argv.chUser)
 	}
 	// add clickhouse password
-	if cmd.argv.chPassword != "" {
-	    req.Header.Add("X-ClickHouse-Key", cmd.argv.chPassword)
+	if cmd_config.argv.chPassword != "" {
+	    req.Header.Add("X-ClickHouse-Key", cmd_config.argv.chPassword)
 	}
 	// send request
 	resp, err := httpClient.Do(req)
@@ -535,7 +535,7 @@ func flush(dst *destination.Setting, table string, body []byte, rowBinary bool, 
 func generateHttpClient() *http.Client {
     // SSL cert path
     //var sslCertPath = getEnv("CLICKHOUSE_SSL_CERT_PATH", "")
-    var sslCertPath = cmd.argv.chSslCertPath
+    var sslCertPath = cmd_config.argv.chSslCertPath
     //
     if sslCertPath != "" {
         // read cert
