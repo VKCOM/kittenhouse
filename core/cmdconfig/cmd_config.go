@@ -7,12 +7,12 @@ import (
 
 var (
 	Argv struct {
-		reverse bool
+		Reverse bool
 
 		Host       string
 		Port       uint
-		help       bool
-		version    bool
+		Help       bool
+		Version    bool
 		MarkAsDone bool
 		User       string
 		Group      string
@@ -38,9 +38,9 @@ var (
 
 func init() {
 	// actions
-	flag.BoolVar(&Argv.help, `h`, false, `show this help`)
-	flag.BoolVar(&Argv.version, `version`, false, `show version`)
-	flag.BoolVar(&Argv.reverse, `reverse`, false, `start reverse proxy server instead (ch-addr is used as clickhouse host-port)`)
+	flag.BoolVar(&Argv.Help, `h`, false, `show this help`)
+	flag.BoolVar(&Argv.Version, `version`, false, `show version`)
+	flag.BoolVar(&Argv.Reverse, `reverse`, false, `start reverse proxy server instead (ch-addr is used as clickhouse host-port)`)
 
 	// common options
 	flag.StringVar(&Argv.Host, `host`, `0.0.0.0`, `listening host`)

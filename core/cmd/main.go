@@ -16,7 +16,7 @@ import (
 
 	"github.com/vkcom/engine-go/srvfunc"
 	"github.com/vkcom/kittenhouse/core/clickhouse"
-	"github.com/vkcom/kittenhouse/core/cmdconfig"
+	cmdconfig "github.com/vkcom/kittenhouse/core/cmdconfig"
 	"github.com/vkcom/kittenhouse/core/destination"
 	"github.com/vkcom/kittenhouse/core/inmem"
 	"github.com/vkcom/kittenhouse/core/persist"
@@ -74,15 +74,15 @@ func updateConfig() {
 	var confHash string
 	var err error
 
-	if argv.config != "" {
-		newConf, ts, confHash, err = parseConfigFile(argv.config)
+	if cmdconfig.Argv.Config != "" {
+		newConf, ts, confHash, err = parseConfigFile(cmdconfig.Argv.Config)
 		if err != nil {
 			log.Printf("Error: Bad config: %s", err.Error())
 			return
 		}
 	} else {
 		ts = time.Now()
-		newConf, confHash, err = parseConfig(bytes.NewBufferString(`* ` + argv.chHost))
+		newConf, confHash, err = parseConfig(bytes.NewBufferString(`* ` + cmdconfig.Argv.ChHost))
 		if err != nil {
 			log.Printf("Error: Bad default config: %s", err.Error())
 			return
@@ -105,14 +105,14 @@ func updateConfig() {
 }
 
 func reopenLog() {
-	if argv.log == "" {
+	if cmdconfig.Argv.Log == "" {
 		return
 	}
 
 	var err error
-	logFd, err = srvfunc.LogRotate(logFd, argv.log)
+	logFd, err = srvfunc.LogRotate(logFd, cmdconfig.Argv.Log)
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf(`Cannot log to file "%s": %s`, argv.log, err.Error()))
+		os.Stderr.WriteString(fmt.Sprintf(`Cannot log to file "%s": %s`, cmdconfig.Argv.Log, err.Error()))
 		return
 	}
 
@@ -127,8 +127,8 @@ func tryIncreaseRlimit() {
 		return
 	}
 
-	rLimit.Max = argv.maxOpenFiles
-	rLimit.Cur = argv.maxOpenFiles
+	rLimit.Max = cmdconfig.Argv.MaxOpenFiles
+	rLimit.Cur = cmdconfig.Argv.MaxOpenFiles
 
 	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 	if err != nil {
@@ -178,23 +178,23 @@ func heartbeatThread() {
 
 // Main is actual main function for kittenhouse but allows to register certain hooks beforehand.
 func Main() {
-	if argv.version {
+	if cmdconfig.Argv.Version {
 		fmt.Fprint(os.Stderr, buildVersion, "\n")
 		return
-	} else if argv.help {
+	} else if cmdconfig.Argv.Help {
 		flag.Usage()
 		return
 	}
 
-	if argv.nProc > 0 {
-		runtime.GOMAXPROCS(int(argv.nProc))
+	if cmdconfig.Argv.NProc > 0 {
+		runtime.GOMAXPROCS(int(cmdconfig.Argv.NProc))
 	} else {
-		argv.nProc = uint(runtime.NumCPU())
+		cmdconfig.Argv.NProc = uint(runtime.NumCPU())
 	}
 
-	if argv.pprofHostPort != `` {
+	if cmdconfig.Argv.PprofHostPort != `` {
 		go func() {
-			if err := http.ListenAndServe(argv.pprofHostPort, nil); err != nil {
+			if err := http.ListenAndServe(cmdconfig.Argv.PprofHostPort, nil); err != nil {
 				log.Printf(`pprof listen fail: %s`, err.Error())
 			}
 		}()
@@ -202,34 +202,34 @@ func Main() {
 
 	tryIncreaseRlimit()
 
-	if argv.group != "" {
-		if err := srvfunc.ChangeGroup(argv.group); err != nil {
-			log.Fatalf("Could not change group to %s: %s", argv.group, err.Error())
+	if cmdconfig.Argv.Group != "" {
+		if err := srvfunc.ChangeGroup(cmdconfig.Argv.Group); err != nil {
+			log.Fatalf("Could not change group to %s: %s", cmdconfig.Argv.Group, err.Error())
 		}
 	}
 
-	if argv.user != "" {
-		if err := srvfunc.ChangeUser(argv.user); err != nil {
-			log.Fatalf("Could not change user to %s: %s", argv.user, err.Error())
+	if cmdconfig.Argv.User != "" {
+		if err := srvfunc.ChangeUser(cmdconfig.Argv.User); err != nil {
+			log.Fatalf("Could not change user to %s: %s", cmdconfig.Argv.User, err.Error())
 		}
 	}
 
-	if argv.reverse {
-		listenAddr := fmt.Sprintf("%s:%d", argv.host, argv.port)
-		log.Printf("Starting reverse proxy at %s (proxy to %s)", listenAddr, argv.chHost)
-		err := clickhouse.RunReverseProxy(listenAddr, argv.chHost)
+	if cmdconfig.Argv.Reverse {
+		listenAddr := fmt.Sprintf("%s:%d", cmdconfig.Argv.Host, cmdconfig.Argv.Port)
+		log.Printf("Starting reverse proxy at %s (proxy to %s)", listenAddr, cmdconfig.Argv.ChHost)
+		err := clickhouse.RunReverseProxy(listenAddr, cmdconfig.Argv.ChHost)
 		log.Fatalf("Could not run reverse proxy: %s", err.Error())
 	}
 
 	clickhouse.Init()
 
 	persist.Init(persist.Config{
-		Dir:            argv.dir,
-		MaxSendSize:    argv.maxSendSize,
-		MaxFileSize:    argv.maxFileSize,
-		RotateInterval: time.Duration(argv.rotateIntervalSec) * time.Second,
-		MarkAsDone:     argv.markAsDone,
-		Port:           argv.port,
+		Dir:            cmdconfig.Argv.Dir,
+		MaxSendSize:    cmdconfig.Argv.MaxSendSize,
+		MaxFileSize:    cmdconfig.Argv.MaxFileSize,
+		RotateInterval: time.Duration(cmdconfig.Argv.RotateIntervalSec) * time.Second,
+		MarkAsDone:     cmdconfig.Argv.MarkAsDone,
+		Port:           cmdconfig.Argv.Port,
 	})
 
 	persist.InternalLog("start", "", 0, "", "version: "+buildVersion+" args:"+fmt.Sprint(os.Args))
@@ -242,11 +242,11 @@ func Main() {
 	go heartbeatThread()
 
 	go func() {
-		if err := StartServerCallback(argv.host, argv.port); err != nil {
+		if err := StartServerCallback(cmdconfig.Argv.Host, cmdconfig.Argv.Port); err != nil {
 			log.Fatalf("Could not listen rpc: %s", err.Error())
 		}
 
-		log.Printf("Listening %s:%d (TCP)", argv.host, argv.port)
+		log.Printf("Listening %s:%d (TCP)", cmdconfig.Argv.Host, cmdconfig.Argv.Port)
 	}()
 
 	go listenUDP()
