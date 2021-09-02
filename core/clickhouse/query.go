@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/Tirael666/engine-go/srvfunc"
-	"github.com/vkcom/Tirael666/core/destination"
+	"github.com/Tirael666/kittenhouse/core/destination"
 )
 
 const (
