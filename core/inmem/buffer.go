@@ -7,8 +7,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/vkcom/Tirael666/core/kittenerror"
-	"github.com/vkcom/Tirael666/core/persist"
+	"github.com/Tirael666/kittenhouse/core/kittenerror"
+	"github.com/Tirael666/kittenhouse/core/persist"
 )
 
 type (
