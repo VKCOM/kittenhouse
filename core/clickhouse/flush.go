@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vkcom/engine-go/srvfunc"
+	"github.com/Tirael666/engine-go/srvfunc"
 	"github.com/vkcom/kittenhouse/core/destination"
 )
 
