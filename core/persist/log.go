@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/vkcom/Tirael666/core/clickhouse"
-	"github.com/vkcom/Tirael666/core/kittenerror"
+	"github.com/Tirael666/kittenhouse/core/clickhouse"
+	"github.com/Tirael666/kittenhouse/core/kittenerror"
 )
 
 const (
