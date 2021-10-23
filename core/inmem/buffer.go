@@ -1,8 +1,8 @@
 package inmem
 
 import (
-	"bytes"
 	"errors"
+	"io"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -19,7 +19,10 @@ type (
 	}
 
 	writeBuf struct {
-		b              bytes.Buffer
+		bufs           [][]byte // buffers chain
+		curBufIdx      int      // current buffer index
+		curBufOff      int      // current read offset in a current buffer
+		len            int      // amount of data written
 		overflowLogged bool
 	}
 )
@@ -102,17 +105,48 @@ func (m *multiWriteBuf) write(table string, data []byte, rowBinary bool) error {
 	return m.values.write(table, data, rowBinary)
 }
 
+func (buf *writeBuf) Read(p []byte) (n int, err error) {
+	out := p
+
+	for {
+		// iterate over buffers until we either run out of buffers
+		// or run out of space in the output slice
+
+		if buf.curBufIdx >= len(buf.bufs) {
+			return n, io.EOF
+		}
+
+		curBuf := buf.bufs[buf.curBufIdx]
+
+		if left := len(curBuf) - buf.curBufOff; left > len(out) {
+			copy(out, curBuf[buf.curBufOff:buf.curBufOff+len(out)])
+			written := len(out)
+			n += written
+			buf.curBufOff += written
+			return n, nil
+		}
+
+		copy(out, curBuf[buf.curBufOff:])
+		written := len(curBuf[buf.curBufOff:])
+		out = out[written:]
+
+		n += written
+		buf.curBufOff = 0
+		buf.curBufIdx++
+	}
+}
+
 func (buf *writeBuf) write(table string, data []byte, rowBinary bool) error {
-	if buf.b.Len()+len(data)+1 >= maxBufSize {
+	if buf.len+len(data)+1 >= maxBufSize {
 		buf.logOverflow(table)
 		return kittenerror.NewCustom(ErrCodeBufferOverflow, "Writing too fast: buffer overflow", "")
 	}
 
-	if !rowBinary && buf.b.Len() > 0 {
-		buf.b.WriteByte(',')
-	}
+	dataCopy := make([]byte, len(data))
+	copy(dataCopy, data)
 
-	buf.b.Write([]byte(data))
+	buf.bufs = append(buf.bufs, dataCopy)
+	buf.len += len(dataCopy)
 	return nil
 }
 
