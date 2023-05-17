@@ -102,8 +102,6 @@ func init() {
 	flag.Int64Var(&argv.maxFileSize, `max-file-size`, 50<<20, `max file size in bytes`)
 	flag.Int64Var(&argv.rotateIntervalSec, `rotate-interval-sec`, 1800, `how often to rotate files`)
 	flag.BoolVar(&argv.markAsDone, `mark-as-done`, false, `rename files to *.done instead of deleting them upon successful delivery`)
-
-	flag.Parse()
 }
 
 func updateThread(ch chan os.Signal) {
@@ -231,6 +229,8 @@ func heartbeatThread() {
 
 // Main is actual main function for kittenhouse but allows to register certain hooks beforehand.
 func Main() {
+	flag.Parse()
+
 	if argv.version {
 		fmt.Fprint(os.Stderr, buildVersion, "\n")
 		return

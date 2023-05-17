@@ -15,11 +15,11 @@ func TestAppendCrcHex(t *testing.T) {
 }
 
 func TestParseFileName(t *testing.T) {
-	if res := getTableFromFileName(getTableFileName("video_log_buffer (...)")); res != "video_log_buffer" {
+	if res := getTableFromFileName(getTableFileName("video_log_buffer (...)", false)); res != "video_log_buffer" {
 		t.Errorf("Could not parse filename: got '%s' instead of 'video_log_buffer'", res)
 	}
 
-	if res := getTableFromFileName(getTableFileName("video_log(...)")); res != "video_log" {
+	if res := getTableFromFileName(getTableFileName("video_log(...)",false)); res != "video_log" {
 		t.Errorf("Could not parse filename: got '%s' instead of 'video_log'", res)
 	}
 

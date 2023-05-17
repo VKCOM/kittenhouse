@@ -55,7 +55,7 @@ func mapDiff(a, b destination.Map, aName, bName string) (diff []string) {
 }
 
 func TestSimpleConfig(t *testing.T) {
-	m, err := parseConfig(bytes.NewBufferString(`* 127.0.0.1`))
+	m, _, err := parseConfig(bytes.NewBufferString(`* 127.0.0.1:8123`))
 	if err != nil {
 		t.Fatalf("Could not parse config: %s", err.Error())
 	}
@@ -73,7 +73,7 @@ func TestSimpleConfig(t *testing.T) {
 }
 
 func TestParseConfig(t *testing.T) {
-	m, err := parseConfig(bytes.NewBufferString(`
+	m, _, err := parseConfig(bytes.NewBufferString(`
 @target_port 3304;
 # Forward all unknown ;tables to default host
 * default;
@@ -112,7 +112,7 @@ table3 =db3*100
 
 func TestBadParseConfig(t *testing.T) {
 	needError := func(conf, substr string) {
-		_, err := parseConfig(bytes.NewBufferString(conf))
+		_, _, err := parseConfig(bytes.NewBufferString(conf))
 		if err == nil {
 			t.Errorf("Expected error for config %s", conf)
 		} else if !strings.Contains(err.Error(), substr) {
