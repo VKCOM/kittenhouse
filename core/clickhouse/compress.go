@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"encoding/binary"
 
-	"github.com/pierrec/lz4"
+	"github.com/pierrec/lz4@v1"
 )
 
 const (
